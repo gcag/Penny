@@ -1,7 +1,7 @@
 exports.run = (client, message, Discord, connection) => {
   // Now this is the fun bit right here
   const msg = message.content.toLowerCase();
-  const adminP = 'p@'; // This is mine ignore it.
+  const adminP = ['test@', 'fucking ']; // This is mine ignore it.
 
   // To prevent the robot uprising...
   if (message.author.bot)
@@ -16,7 +16,7 @@ exports.run = (client, message, Discord, connection) => {
         connection.query(`SELECT * FROM \`User\` WHERE \`User_ID\` = ${message.author.id}`, (err, res) => {
           if (err)
             throw err;
-            if (prefix[0].levels === 1)
+          if (prefix[0].levels === 1)
             xpAdd(connection, message);
           try {
             // This is for seeing if the user is blacklisted or not. Some people man smh.
@@ -24,8 +24,6 @@ exports.run = (client, message, Discord, connection) => {
               return;
             } else {
               // This uh, uhm, yeah it does that one thing where it ignores things with some other bits.
-              if (message.content.startsWith(client.prefix))
-                connection.query(`UPDATE \`User\` SET \`Used\` = \`Used\` + 1 WHERE \`User_ID\` = ${message.author.id}`);
               if (message.content.indexOf(client.prefix) !== 0)
                 return;
 
@@ -35,9 +33,20 @@ exports.run = (client, message, Discord, connection) => {
               if (cmd) {
                 try {
                   cmd.run(client, message, args, Discord, connection);
+                  connection.query(`UPDATE \`User\` SET \`Used\` = \`Used\` + 1 WHERE \`User_ID\` = ${message.author.id}`);
                 } catch (e) {
                   client.users.get('232614905533038593').send(`Error:\n${e}\nUsed in:\n${message.content}`);
                 }
+              } else {
+                connection.query(`SELECT * FROM \`tags\` WHERE \`guild\` = ${message.guild.id} AND \`name\` = ${connection.escape(command[0])}`, (e, tag) => {
+                  if (e)
+                    client.users.get('232614905533038593').send(`Error:\n${e}\nUsed in:\n${message.content}`);
+
+                  if (tag.length > 0) {
+                    connection.query(`UPDATE \`tags\` SET \`used\` = \`used\` + 1 WHERE \`name\` = ${connection.escape(command[0])} AND \`guild\` = ${message.guild.id}`);
+                    message.channel.send(clean(tag[0].content));
+                  }
+                });
               }
             }
           } catch (TypeError) {
@@ -71,15 +80,17 @@ exports.run = (client, message, Discord, connection) => {
           message.channel.send("What's this?");
 
         // Admin commands
-
-        if (msg.startsWith(adminP) && message.author.id === '232614905533038593') {
-          const adminCommand = message.content.toLowerCase().substr(adminP.length).split(' ');
-          const adminCmd = client.adminCommands.get(adminCommand[0]);
-          if (adminCmd) {
-            try {
-              adminCmd.run(client, message, args, Discord, connection);
-            } catch (e) {
-              client.users.get('232614905533038593').send(`Error:\n${e}\nUsed in:\n${message.content}`);
+        for (let i = 0; i < adminP.length; i++) {
+          if (msg.startsWith(adminP[i]) && message.author.id === '232614905533038593') {
+            const adminCommand = message.content.toLowerCase().substr(adminP[i].length).split(' ');
+            const adminCmd = client.adminCommands.get(adminCommand[0]);
+            if (adminCmd) {
+              try {
+                adminCmd.run(client, message, args, Discord, connection);
+                break;
+              } catch (e) {
+                client.users.get('232614905533038593').send(`Error:\n${e}\nUsed in:\n${message.content}`);
+              }
             }
           }
         }
@@ -105,4 +116,11 @@ function xpAdd(connection, message) {
       }
     });
   });
+}
+
+function clean(text) {
+  if (typeof text === 'string')
+    return text.replace(/`/g, `\`${String.fromCharCode(8203)}`).replace(/@/g, `@${String.fromCharCode(8203)}`);
+  else
+    return text;
 }
