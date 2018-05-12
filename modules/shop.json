@@ -143,7 +143,7 @@
             "name": "penny02",
             "type": "background"
         },
-        "pyrrah01": {
+        "pyrrha01": {
             "image": "http://pennybot.tk/assets/emblems/pyrrha01.png",
             "price": "3000",
             "name": "pyrrha01",
@@ -681,6 +681,13 @@
             "image": "http://pennybot.tk/assets/mei02.png",
             "price": "8000",
             "name": "mei02",
+            "type": "background"
+        }
+        ,
+        "yandere": {
+            "image": "http://pennybot.tk/assets/yandere.png",
+            "price": "6000",
+            "name": "yandere",
             "type": "background"
         }
 }
