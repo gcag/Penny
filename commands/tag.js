@@ -10,7 +10,7 @@ exports.run = (client, message, args, Discord, connection) => {
           client.users.get(`232614905533038593`).send(`Error in tag check:\n${err}`);
         if (res[0].inD === 0) {
           let content = message.content.substr(12 + client.prefix.length + args[2].length);
-          if (banned.includes(args[2])) {
+          if (banned.includes(args[2]) || client.commands.get(args[2])) {
             message.channel.send(`You cannot make a tag with this name.`);
           } else if (content.length > 0) {
             connection.query(`INSERT INTO \`tags\` (\`guild\`, \`ID\`, \`owner\`, \`name\`, \`content\`) VALUES (${message.guild.id}, '${Date.now().toString(16)}', ${message.author.id}, ${connection.escape(args[2])}, ${connection.escape(content)})`);
